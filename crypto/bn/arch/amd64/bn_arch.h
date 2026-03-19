@@ -20,6 +20,12 @@
 #ifndef HEADER_BN_ARCH_H
 #define HEADER_BN_ARCH_H
 
+#ifdef _WIN32
+#ifndef OPENSSL_NO_ASM
+#define OPENSSL_NO_ASM
+#endif
+#else
+
 #ifndef OPENSSL_NO_ASM
 
 #define HAVE_BN_ADD
@@ -110,6 +116,7 @@ bn_subw(BN_ULONG a, BN_ULONG b, BN_ULONG *out_borrow, BN_ULONG *out_r0)
 }
 
 #endif /* __GNUC__ */
+#endif /* _WIN32 */
 
 #endif
 #endif

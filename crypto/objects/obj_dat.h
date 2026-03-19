@@ -62,12 +62,12 @@
  * [including the GNU Public Licence.]
  */
 
-#define NUM_NID 1057
-#define NUM_SN 1050
-#define NUM_LN 1050
-#define NUM_OBJ 977
+#define NUM_NID 1059
+#define NUM_SN 1052
+#define NUM_LN 1052
+#define NUM_OBJ 980
 
-static const unsigned char lvalues[6968]={
+static const unsigned char lvalues[7001]={
 0x2A,0x86,0x48,0x86,0xF7,0x0D,               /* [  0] OBJ_rsadsi */
 0x2A,0x86,0x48,0x86,0xF7,0x0D,0x01,          /* [  6] OBJ_pkcs */
 0x2A,0x86,0x48,0x86,0xF7,0x0D,0x02,0x02,     /* [ 13] OBJ_md2 */
@@ -1039,6 +1039,9 @@ static const unsigned char lvalues[6968]={
 0x60,0x86,0x48,0x01,0x65,0x03,0x04,0x03,0x10,/* [6939] OBJ_RSA_SHA3_512 */
 0x2B,0x06,0x01,0x05,0x05,0x07,0x01,0x1F,     /* [6948] OBJ_acmeIdentifier */
 0x2A,0x86,0x48,0x86,0xF7,0x0D,0x01,0x09,0x10,0x01,0x33,/* [6956] OBJ_id_ct_rpkiSignedPrefixList */
+0x60,0x86,0x48,0x01,0x86,0xFA,0x6B,0x50,0x05,0x02,0x21,/* [6967] OBJ_MLKEM768_X25519 */
+0x60,0x86,0x48,0x01,0x86,0xFA,0x6B,0x50,0x05,0x02,0x22,/* [6978] OBJ_MLKEM768_ECDH_P256 */
+0x60,0x86,0x48,0x01,0x86,0xFA,0x6B,0x50,0x05,0x02,0x23,/* [6989] OBJ_MLKEM768_ECDH_P384 */
 };
 
 static const ASN1_OBJECT nid_objs[NUM_NID]={
@@ -2762,7 +2765,12 @@ static const ASN1_OBJECT nid_objs[NUM_NID]={
 {"id-ct-rpkiSignedPrefixList","id-ct-rpkiSignedPrefixList",
 	NID_id_ct_rpkiSignedPrefixList,11,&(lvalues[6956]),0},
 {"TLS1-PRF","tls1-prf",NID_tls1_prf,0,NULL,0},
-{"X25519MLKEM768","X25519MLKEM768",NID_X25519MLKEM768,0,NULL,0},
+{"MLKEM768-X25519","MLKEM768-X25519",NID_MLKEM768_X25519,11,
+	&(lvalues[6967]),0},
+{"MLKEM768-ECDH-P256","MLKEM768-ECDH-P256",NID_MLKEM768_ECDH_P256,11,
+	&(lvalues[6978]),0},
+{"MLKEM768-ECDH-P384","MLKEM768-ECDH-P384",NID_MLKEM768_ECDH_P384,11,
+	&(lvalues[6989]),0},
 };
 
 static const unsigned int sn_objs[NUM_SN]={
@@ -2890,6 +2898,9 @@ static const unsigned int sn_objs[NUM_SN]={
 114,	/* "MD5-SHA1" */
 95,	/* "MDC2" */
 911,	/* "MGF1" */
+1057,	/* "MLKEM768-ECDH-P256" */
+1058,	/* "MLKEM768-ECDH-P384" */
+1056,	/* "MLKEM768-X25519" */
 388,	/* "Mail" */
 393,	/* "NULL" */
 404,	/* "NULL" */
@@ -2986,7 +2997,6 @@ static const unsigned int sn_objs[NUM_SN]={
 458,	/* "UID" */
  0,	/* "UNDEF" */
 950,	/* "X25519" */
-1056,	/* "X25519MLKEM768" */
 951,	/* "X448" */
 11,	/* "X500" */
 378,	/* "X500algorithms" */
@@ -3898,6 +3908,9 @@ static const unsigned int ln_objs[NUM_LN]={
 647,	/* "International Organizations" */
 142,	/* "Invalidity Date" */
 504,	/* "MIME MHS" */
+1057,	/* "MLKEM768-ECDH-P256" */
+1058,	/* "MLKEM768-ECDH-P384" */
+1056,	/* "MLKEM768-X25519" */
 388,	/* "Mail" */
 383,	/* "Management" */
 417,	/* "Microsoft CSP Name" */
@@ -3964,7 +3977,6 @@ static const unsigned int ln_objs[NUM_LN]={
 133,	/* "Time Stamping" */
 375,	/* "Trust Root" */
 950,	/* "X25519" */
-1056,	/* "X25519MLKEM768" */
 951,	/* "X448" */
 12,	/* "X509" */
 402,	/* "X509v3 AC Targeting" */
@@ -5849,5 +5861,8 @@ static const unsigned int obj_objs[NUM_OBJ]={
 956,	/* OBJ_jurisdictionLocalityName     1 3 6 1 4 1 311 60 2 1 1 */
 957,	/* OBJ_jurisdictionStateOrProvinceName 1 3 6 1 4 1 311 60 2 1 2 */
 958,	/* OBJ_jurisdictionCountryName      1 3 6 1 4 1 311 60 2 1 3 */
+1056,	/* OBJ_MLKEM768_X25519              2 16 840 1 114027 80 5 2 33 */
+1057,	/* OBJ_MLKEM768_ECDH_P256           2 16 840 1 114027 80 5 2 34 */
+1058,	/* OBJ_MLKEM768_ECDH_P384           2 16 840 1 114027 80 5 2 35 */
 };
 

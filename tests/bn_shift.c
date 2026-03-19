@@ -355,6 +355,8 @@ test_bn_rshift_to_zero(void)
 	return failed;
 }
 
+#if 0
+
 static void
 benchmark_bn_lshift1(BIGNUM *bn)
 {
@@ -620,9 +622,12 @@ benchmark_run(const struct benchmark *bm, int seconds)
 	BN_free(bn);
 }
 
+#endif
+
 static void
 benchmark_bn_shift(void)
 {
+#if 0
 	const struct benchmark *bm;
 	size_t i;
 
@@ -630,6 +635,9 @@ benchmark_bn_shift(void)
 		bm = &benchmarks[i];
 		benchmark_run(bm, 5);
 	}
+#else
+	return;
+#endif
 }
 
 int

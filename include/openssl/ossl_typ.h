@@ -82,6 +82,21 @@ typedef struct asn1_object_st ASN1_OBJECT;
 typedef struct ASN1_ITEM_st ASN1_ITEM;
 typedef struct asn1_pctx_st ASN1_PCTX;
 
+#if defined(_WIN32) && defined(__WINCRYPT_H__)
+#if !defined(LIBRESSL_INTERNAL) && !defined(LIBRESSL_DISABLE_OVERRIDE_WINCRYPT_DEFINES_WARNING)
+#ifdef _MSC_VER
+#pragma message("Warning, overriding WinCrypt defines")
+#else
+#warning overriding WinCrypt defines
+#endif
+#endif
+#undef X509_NAME
+#undef X509_EXTENSIONS
+#undef OCSP_REQUEST
+#undef OCSP_RESPONSE
+#undef PKCS7_ISSUER_AND_SERIAL
+#endif
+
 #ifdef BIGNUM
 #undef BIGNUM
 #endif

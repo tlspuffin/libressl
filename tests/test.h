@@ -1,4 +1,4 @@
-/*	$OpenBSD: test.h,v 1.5 2025/12/25 02:40:53 tb Exp $ */
+/*	$OpenBSD: test.h,v 1.4 2025/05/31 11:37:18 tb Exp $ */
 /*
  * Copyright (c) 2025 Joshua Sing <joshua@joshuasing.dev>
  *
@@ -17,6 +17,8 @@
 
 #ifndef HEADER_TEST_H
 #define HEADER_TEST_H
+
+#include <openssl/opensslfeatures.h>
 
 #include <stddef.h>
 #include <stdint.h>
@@ -130,7 +132,7 @@ void test_hexdump(struct test *_t, const unsigned char *_buf, size_t _len);
 
 /*
  * test_hexdiff prints the given data as hexadecimal. If a second comparison
- * buffer is not NULL, any differing bytes will be marked with an asterisk.
+ * buffer is not NULL, any differing bytes will be marked with an astrix.
  */
 void test_hexdiff(struct test *_t, const uint8_t *_buf, size_t _len, const uint8_t *_compare);
 

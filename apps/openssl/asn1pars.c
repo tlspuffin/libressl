@@ -1,4 +1,4 @@
-/* $OpenBSD: asn1pars.c,v 1.20 2026/01/31 09:01:09 tb Exp $ */
+/* $OpenBSD: asn1pars.c,v 1.17 2025/01/02 12:31:44 tb Exp $ */
 /* Copyright (C) 1995-1998 Eric Young (eay@cryptsoft.com)
  * All rights reserved.
  *
@@ -237,10 +237,12 @@ int
 asn1parse_main(int argc, char **argv)
 {
 	int i, j, ret = 1;
-	long num;
+	long num, tmplen;
 	BIO *in = NULL, *out = NULL, *b64 = NULL, *derout = NULL;
+	char *str = NULL;
 	const char *errstr = NULL;
-	const unsigned char *str;
+	unsigned char *tmpbuf;
+	const unsigned char *ctmpbuf;
 	BUF_MEM *buf = NULL;
 	ASN1_TYPE *at = NULL;
 
@@ -328,15 +330,13 @@ asn1parse_main(int argc, char **argv)
 			num += i;
 		}
 	}
-	str = (const unsigned char *)buf->data;
+	str = buf->data;
 
 	/* If any structs to parse go through in sequence */
 
 	if (sk_OPENSSL_STRING_num(cfg.osk) > 0) {
-		const unsigned char *p;
-		const unsigned char *tmpbuf = str;
-		long tmplen = num;
-
+		tmpbuf = (unsigned char *) str;
+		tmplen = num;
 		for (i = 0; i < sk_OPENSSL_STRING_num(cfg.osk); i++) {
 			ASN1_TYPE *atmp;
 			int typ;
@@ -351,8 +351,8 @@ asn1parse_main(int argc, char **argv)
 			tmpbuf += j;
 			tmplen -= j;
 			atmp = at;
-			p = tmpbuf;
-			at = d2i_ASN1_TYPE(NULL, &p, tmplen);
+			ctmpbuf = tmpbuf;
+			at = d2i_ASN1_TYPE(NULL, &ctmpbuf, tmplen);
 			ASN1_TYPE_free(atmp);
 			if (!at) {
 				BIO_printf(bio_err, "Error parsing structure\n");
@@ -368,10 +368,10 @@ asn1parse_main(int argc, char **argv)
 				goto end;
 			}
 			/* hmm... this is a little evil but it works */
-			tmpbuf = ASN1_STRING_get0_data(at->value.asn1_string);
-			tmplen = ASN1_STRING_length(at->value.asn1_string);
+			tmpbuf = at->value.asn1_string->data;
+			tmplen = at->value.asn1_string->length;
 		}
-		str = tmpbuf;
+		str = (char *) tmpbuf;
 		num = tmplen;
 	}
 	if (cfg.offset >= num) {
@@ -390,8 +390,8 @@ asn1parse_main(int argc, char **argv)
 			goto end;
 		}
 	}
-	if (!cfg.noout && !ASN1_parse_dump(out, &str[cfg.offset], cfg.length,
-	    cfg.indent, cfg.dump)) {
+	if (!cfg.noout && !ASN1_parse_dump(out,
+	    (unsigned char *)&str[cfg.offset], cfg.length, cfg.indent, cfg.dump)) {
 		ERR_print_errors(bio_err);
 		goto end;
 	}

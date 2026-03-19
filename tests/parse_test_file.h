@@ -22,6 +22,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include <openssl/opensslfeatures.h>
+
 #include "bytestring.h"
 
 #if defined(__cplusplus)

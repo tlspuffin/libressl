@@ -1,4 +1,4 @@
-/* $OpenBSD: tls_config.c,v 1.72 2026/03/10 05:26:04 deraadt Exp $ */
+/* $OpenBSD: tls_config.c,v 1.71 2024/08/02 15:00:01 tb Exp $ */
 /*
  * Copyright (c) 2014 Joel Sing <jsing@openbsd.org>
  *
@@ -49,7 +49,7 @@ tls_config_load_file(struct tls_error *error, const char *filetype,
 	*buf = NULL;
 	*len = 0;
 
-	if ((fd = open(filename, O_RDONLY|O_CLOEXEC)) == -1) {
+	if ((fd = open(filename, O_RDONLY)) == -1) {
 		tls_error_set(error, TLS_ERROR_UNKNOWN,
 		    "failed to open %s file '%s'",
 		    filetype, filename);
@@ -742,8 +742,8 @@ tls_config_set_session_fd(struct tls_config *config, int session_fd)
 
 	if (sb.st_uid != getuid()) {
 		tls_config_set_errorx(config, TLS_ERROR_UNKNOWN,
-		    "session file has incorrect owner (uid %u != %u)",
-		    sb.st_uid, getuid());
+		    "session file has incorrect owner (uid %llu != %llu)",
+		    (unsigned long long)sb.st_uid, (unsigned long long)getuid());
 		return (-1);
 	}
 	mugo = sb.st_mode & (S_IRWXU|S_IRWXG|S_IRWXO);

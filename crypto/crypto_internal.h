@@ -15,6 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <openssl/opensslfeatures.h>
+
 #include <endian.h>
 #include <stddef.h>
 #include <stdint.h>

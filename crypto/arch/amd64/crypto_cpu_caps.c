@@ -37,7 +37,7 @@ cpuid(uint32_t eax, uint32_t *out_eax, uint32_t *out_ebx, uint32_t *out_ecx,
 {
 	uint32_t ebx = 0, ecx = 0, edx = 0;
 
-#ifndef OPENSSL_NO_ASM
+#if defined(__GNUC__) && !defined(OPENSSL_NO_ASM)
 	__asm__ ("cpuid": "+a"(eax), "+b"(ebx), "+c"(ecx), "+d"(edx));
 #else
 	eax = 0;
@@ -58,7 +58,7 @@ xgetbv(uint32_t ecx, uint32_t *out_eax, uint32_t *out_edx)
 {
 	uint32_t eax = 0, edx = 0;
 
-#ifndef OPENSSL_NO_ASM
+#if defined(__GNUC__) && !defined(OPENSSL_NO_ASM)
 	__asm__ ("xgetbv": "+a"(eax), "+c"(ecx), "+d"(edx));
 #endif
 

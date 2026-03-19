@@ -1,4 +1,4 @@
-/*	$OpenBSD: crypto_cpu_caps.c,v 1.7 2025/12/31 10:06:41 jsing Exp $ */
+/*	$OpenBSD: crypto_cpu_caps.c,v 1.6 2025/07/22 09:18:02 jsing Exp $ */
 /*
  * Copyright (c) 2024 Joel Sing <jsing@openbsd.org>
  *
@@ -37,7 +37,7 @@ cpuid(uint32_t eax, uint32_t *out_eax, uint32_t *out_ebx, uint32_t *out_ecx,
 {
 	uint32_t ebx = 0, ecx = 0, edx = 0;
 
-#ifndef OPENSSL_NO_ASM
+#if defined(__GNUC__) && !defined(OPENSSL_NO_ASM)
 	__asm__ ("cpuid": "+a"(eax), "+b"(ebx), "+c"(ecx), "+d"(edx));
 #else
 	eax = 0;
@@ -58,7 +58,7 @@ xgetbv(uint32_t ecx, uint32_t *out_eax, uint32_t *out_edx)
 {
 	uint32_t eax = 0, edx = 0;
 
-#ifndef OPENSSL_NO_ASM
+#if defined(__GNUC__) && !defined(OPENSSL_NO_ASM)
 	__asm__ ("xgetbv": "+a"(eax), "+c"(ecx), "+d"(edx));
 #endif
 
@@ -93,10 +93,8 @@ crypto_cpu_caps_init(void)
 		caps |= CPUCAP_MASK_MMX;
 		crypto_cpu_caps_i386 |= CRYPTO_CPU_CAPS_I386_MMX;
 	}
-	if ((edx & IA32CAP_MASK0_SSE) != 0) {
+	if ((edx & IA32CAP_MASK0_SSE) != 0)
 		caps |= CPUCAP_MASK_SSE;
-		crypto_cpu_caps_i386 |= CRYPTO_CPU_CAPS_I386_SSE;
-	}
 	if ((edx & IA32CAP_MASK0_SSE2) != 0)
 		caps |= CPUCAP_MASK_SSE2;
 

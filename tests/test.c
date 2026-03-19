@@ -1,4 +1,4 @@
-/*	$OpenBSD: test.c,v 1.6 2025/10/07 15:41:19 tb Exp $ */
+/*	$OpenBSD: test.c,v 1.4 2025/05/31 11:36:48 tb Exp $ */
 /*
  * Copyright (c) 2025 Joshua Sing <joshua@joshuasing.dev>
  *
@@ -67,7 +67,7 @@ test_init(void)
 		return t;
 
 	/* Create a temporary file for logging in non-verbose mode */
-	if ((tmp_file = strdup("/tmp/libressl-test.XXXXXXXX")) == NULL)
+	if ((tmp_file = strdup("libressl-test.XXXXXXXX")) == NULL)
 		err(1, "strdup");
 	if ((out_fd = mkstemp(tmp_file)) == -1)
 		err(1, "mkstemp");

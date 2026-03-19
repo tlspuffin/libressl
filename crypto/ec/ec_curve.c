@@ -1,4 +1,7 @@
-/* $OpenBSD: ec_curve.c,v 1.60 2025/12/15 12:09:46 tb Exp $ */
+/* $OpenBSD: ec_curve.c,v 1.58 2025/05/10 05:54:38 tb Exp $ */
+/*
+ * Written by Nils Larsch for the OpenSSL project.
+ */
 /* ====================================================================
  * Copyright (c) 1998-2010 The OpenSSL Project.  All rights reserved.
  *
@@ -1392,7 +1395,7 @@ ec_curve_from_group(const EC_GROUP *group)
 	if ((cofactor = EC_GROUP_get0_cofactor(group)) != NULL) {
 		BN_ULONG cofactor_word;
 
-		if ((cofactor_word = BN_get_word(cofactor)) == (BN_ULONG)-1)
+		if ((cofactor_word = BN_get_word(cofactor)) == BN_MASK2)
 			goto err;
 		if (cofactor_word > INT_MAX)
 			goto err;

@@ -1,4 +1,4 @@
-/* $OpenBSD: ts.c,v 1.30 2025/11/21 08:25:43 tb Exp $ */
+/* $OpenBSD: ts.c,v 1.29 2024/08/26 18:40:50 tb Exp $ */
 /* Written by Zoltan Glozik (zglozik@stones.com) for the OpenSSL
  * project 2002.
  */
@@ -736,23 +736,33 @@ create_digest(BIO *input, char *digest, const EVP_MD *md,
 static ASN1_INTEGER *
 create_nonce(int bits)
 {
-	BIGNUM *bn;
+	unsigned char buf[20];
 	ASN1_INTEGER *nonce = NULL;
+	int len = (bits - 1) / 8 + 1;
+	int i;
 
-	if ((bn = BN_new()) == NULL)
+	/* Generating random byte sequence. */
+	if (len > (int) sizeof(buf))
 		goto err;
-	if (!BN_rand(bn, bits, BN_RAND_TOP_ANY, BN_RAND_BOTTOM_ANY))
+	arc4random_buf(buf, len);
+
+	/* Find the first non-zero byte and creating ASN1_INTEGER object. */
+	for (i = 0; i < len && !buf[i]; ++i)
+		;
+	if ((nonce = ASN1_INTEGER_new()) == NULL)
 		goto err;
-	if ((nonce = BN_to_ASN1_INTEGER(bn, NULL)) == NULL)
+	free(nonce->data);
+	/* Allocate at least one byte. */
+	nonce->length = len - i;
+	if ((nonce->data = malloc(nonce->length + 1)) == NULL)
 		goto err;
-	BN_free(bn);
+	memcpy(nonce->data, buf + i, nonce->length);
 
 	return nonce;
 
  err:
 	BIO_printf(bio_err, "could not create nonce\n");
 	ASN1_INTEGER_free(nonce);
-	BN_free(bn);
 	return NULL;
 }
 

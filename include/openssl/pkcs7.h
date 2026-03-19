@@ -1,4 +1,4 @@
-/* $OpenBSD: pkcs7.h,v 1.25 2025/12/20 07:22:43 tb Exp $ */
+/* $OpenBSD: pkcs7.h,v 1.24 2025/07/02 10:24:17 tb Exp $ */
 /* Copyright (C) 1995-1998 Eric Young (eay@cryptsoft.com)
  * All rights reserved.
  *
@@ -67,6 +67,18 @@
 
 #ifdef  __cplusplus
 extern "C" {
+#endif
+
+#if defined(_WIN32) && defined(__WINCRYPT_H__)
+#if !defined(LIBRESSL_INTERNAL) && !defined(LIBRESSL_DISABLE_OVERRIDE_WINCRYPT_DEFINES_WARNING)
+#ifdef _MSC_VER
+#pragma message("Warning, overriding WinCrypt defines")
+#else
+#warning overriding WinCrypt defines
+#endif
+#endif
+#undef PKCS7_ISSUER_AND_SERIAL
+#undef PKCS7_SIGNER_INFO
 #endif
 
 /*
@@ -241,7 +253,6 @@ DECLARE_PKCS12_STACK_OF(PKCS7)
 #define PKCS7_NOCRL		0x2000
 #define PKCS7_PARTIAL		0x4000
 #define PKCS7_REUSE_DIGEST	0x8000
-#define PKCS7_NO_DUAL_CONTENT	0x10000
 
 /* Flags: for compatibility with older code */
 
