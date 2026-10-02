@@ -154,6 +154,40 @@ tls13_secrets_destroy(struct tls13_secrets *secrets)
 	freezero(secrets, sizeof(struct tls13_secrets));
 }
 
+/* "" s "" only compiles for a string literal, so sizeof never sees a pointer. */
+#define TLS13_CLAIM_LABEL(s, t) { "" s "", sizeof(s) - 1, (t) }
+
+static const struct {
+    const char *label;
+    size_t len;
+    ClaimType typ;
+} tls13_claim_labels[] = {
+    TLS13_CLAIM_LABEL("ext binder", CLAIM_TRANSCRIPT_CH_SH),
+    TLS13_CLAIM_LABEL("res binder", CLAIM_TRANSCRIPT_CH_SH),
+    TLS13_CLAIM_LABEL("c e traffic", CLAIM_TRANSCRIPT_CH_SH),
+    TLS13_CLAIM_LABEL("e exp master", CLAIM_TRANSCRIPT_CH_SH),
+    TLS13_CLAIM_LABEL("c hs traffic", CLAIM_TRANSCRIPT_CH_SH),
+    TLS13_CLAIM_LABEL("s hs traffic", CLAIM_TRANSCRIPT_CH_SH),
+    TLS13_CLAIM_LABEL("c ap traffic", CLAIM_TRANSCRIPT_CH_SERVER_FIN),
+    TLS13_CLAIM_LABEL("s ap traffic", CLAIM_TRANSCRIPT_CH_SERVER_FIN),
+    TLS13_CLAIM_LABEL("exp master", CLAIM_TRANSCRIPT_CH_SERVER_FIN),
+    TLS13_CLAIM_LABEL("res master", CLAIM_TRANSCRIPT_CH_CLIENT_FIN),
+};
+
+/* Labels are matched exactly: same length and same bytes. */
+static ClaimType
+tls13_transcript_claim_type(const uint8_t *label, size_t label_len)
+{
+    size_t i;
+
+    for (i = 0; i < sizeof(tls13_claim_labels) / sizeof(tls13_claim_labels[0]); i++) {
+        if (label_len == tls13_claim_labels[i].len &&
+            memcmp(label, tls13_claim_labels[i].label, label_len) == 0)
+            return tls13_claim_labels[i].typ;
+    }
+    return CLAIM_TRANSCRIPT_UNKNOWN;
+}
+
 int
 tls13_hkdf_expand_label(struct tls13_ctx *ctx, struct tls13_secret *out, const EVP_MD *digest,
     const struct tls13_secret *secret, const char *label,
@@ -168,41 +202,16 @@ tls13_hkdf_expand_label_with_length(struct tls13_ctx *ctx, struct tls13_secret *
     const EVP_MD *digest, const struct tls13_secret *secret,
     const uint8_t *label, size_t label_len, const struct tls13_secret *context)
 {
-    size_t labellen = label_len;
-    if (context != NULL) {
-        uint8_t *data = context->data;
-        size_t datalen = context->len;
-        static const unsigned char client_early_traffic[] = "c e traffic";
-        static const unsigned char client_handshake_traffic[] = "c hs traffic";
-        static const unsigned char client_application_traffic[] = "c ap traffic";
-        static const unsigned char server_handshake_traffic[] = "s hs traffic";
-        static const unsigned char server_application_traffic[] = "s ap traffic";
-        static const unsigned char exporter_master_secret[] = "exp master";
-        static const unsigned char resumption_master_secret[] = "res master";
-        static const unsigned char early_exporter_master_secret[] = "e exp master";
-        static const unsigned char ext_binder[] = "ext binder";
-        static const unsigned char res_binder[] = "res binder";
+    if (context != NULL && ctx->ssl->claim != NULL) {
         Claim claim = {-1};
-        if ((labellen == sizeof(ext_binder) - 1 && memcmp(label, ext_binder, labellen) == 0) ||
-            (labellen == sizeof(res_binder) - 1 && memcmp(label, res_binder, labellen) == 0) ||
-            (labellen == sizeof(client_early_traffic) - 1 && memcmp(label, client_early_traffic, labellen) == 0) ||
-            (labellen == sizeof(early_exporter_master_secret) - 1 && memcmp(label, early_exporter_master_secret, labellen) == 0)) {
-            claim.typ = CLAIM_TRANSCRIPT_CH_SH;
-        } else if ((labellen == sizeof(client_handshake_traffic) - 1 && memcmp(label, client_handshake_traffic, labellen) == 0) ||
-                   (labellen == sizeof(server_handshake_traffic) - 1 && memcmp(label, server_handshake_traffic, labellen) == 0)) {
-            claim.typ = CLAIM_TRANSCRIPT_CH_SH;
-        } else if ((labellen == sizeof(client_application_traffic) - 1 && memcmp(label, client_application_traffic, labellen) == 0) ||
-                   (labellen == sizeof(server_application_traffic) - 1 && memcmp(label, server_application_traffic, labellen) == 0) ||
-                   (labellen == sizeof(exporter_master_secret) - 1 && memcmp(label, exporter_master_secret, labellen) == 0)) {
-            claim.typ = CLAIM_TRANSCRIPT_CH_SERVER_FIN;
-        } else if (labellen == sizeof(resumption_master_secret) - 1 && memcmp(label, resumption_master_secret, labellen) == 0) {
-            claim.typ = CLAIM_TRANSCRIPT_CH_CLIENT_FIN;
-        } else {
-            claim.typ = CLAIM_TRANSCRIPT_UNKNOWN;
+
+        /* The transcript buffer holds one hash; skip anything that does not fit. */
+        if (context->len <= sizeof(claim.transcript.data)) {
+            claim.typ = tls13_transcript_claim_type(label, label_len);
+            memcpy(claim.transcript.data, context->data, context->len);
+            claim.transcript.length = context->len;
+            ctx->ssl->claim(claim, ctx->ssl->claim_ctx);
         }
-        memcpy(claim.transcript.data, data, datalen);
-        claim.transcript.length = datalen;
-        ctx->ssl->claim(claim, ctx->ssl->claim_ctx);
     }
 
 	const char tls13_plabel[] = "tls13 ";
